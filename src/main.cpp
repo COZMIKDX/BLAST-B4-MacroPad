@@ -17,16 +17,44 @@ const unsigned int debounce_delay = 50; // milliseconds.
 unsigned long input_interval = 50; //ms 
 unsigned long previous_millis = 0;
 
+void led() {
+  digitalWrite(STATUS_LED, HIGH);
+  delay(1000);
+  digitalWrite(STATUS_LED, LOW);
+}
+
+void led_off() {
+  digitalWrite(STATUS_LED, LOW);
+  delay(1000);
+}
+
+uint8_t get_button_state(uint8_t button_number) {
+  uint8_t mask = 1 << button_number;
+  uint8_t state = buttons_state & mask;
+  return state >> button_number; // shift the state bit to the 0th so that you can use boolean logic and HIGH and LOW.
+}
+
+uint8_t get_button_previous_state(uint8_t button_number)
+{
+  uint8_t mask = 1 << button_number;
+  uint8_t state = buttons_previous_state & mask;
+  return state >> button_number;
+}
+
+
 
 void button_poll() {
-  for (int i = 0; i < NUM_BUTTONS; i++) {
-    // Set the old button state data to the previous state before  we poll the buttons and
-    // get the current state.
-    buttons_previous_state = buttons_state; 
+  // Set the old button state data to the previous state before  we poll the buttons and
+  // get the current state.
+  buttons_previous_state = buttons_state;
 
+  for (int i = 0; i < NUM_BUTTONS; i++) {
     // If the button's state is read differently than it was previously, start the debounce timer.
-    if (digitalRead(BUTTON_PINS [i]) != (buttons_previous_state & (1 << i))) {
-      debounce_start_time[i] = millis();
+    if (digitalRead(BUTTON_PINS [i]) != !(buttons_previous_state & (1 << i))) {
+      //debounce_start_time[i] = millis();
+      Serial.print("change detected: ");
+      Serial.print(i);
+      Serial.print("\n");
     }
 
     // Debounce for this button is probably done now, so it should be okay to save it's state.
@@ -102,8 +130,10 @@ void setup() {
   delay(300);
   digitalWrite(STATUS_LED, LOW);
   delay(300);
-  digitalWrite(STATUS_LED, HIGH);
-  Keyboard.begin();
+  digitalWrite(STATUS_LED, LOW);
+  //Keyboard.begin();
+  Serial.begin(9600);
+  Serial.println("BEGIN!");
 }
 
 // doesn't deal with debounce yet.
@@ -111,7 +141,7 @@ void loop() {
   button_poll();
 
   unsigned long time = millis();
-  if (time - previous_millis >= input_interval) {
+  /*if (time - previous_millis >= input_interval) {
     previous_millis = time;
     if (button_pressed(BUTTON_0)) {
       Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
@@ -143,5 +173,5 @@ void loop() {
       Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.release('v');
     }
-  }
+  }*/
 }
