@@ -51,7 +51,7 @@ void button_poll() {
 
 bool button_pressed (uint8_t button_number) {
   uint8_t mask = 1 << button_number;
-  if ((buttons_state & mask == mask) && (buttons_previous_state & mask == 0)) {
+  if (((buttons_state & mask) == mask) && ((buttons_previous_state & mask) == 0)) {
     return true;
   }
   else {
@@ -62,7 +62,7 @@ bool button_pressed (uint8_t button_number) {
 // can be used if you want repeated function calling. Like, holding a key to print it several times.
 bool button_held (uint8_t button_number) {
   uint8_t mask = 1 << button_number;
-  if ((buttons_state & mask == mask) && (buttons_previous_state & mask == mask))
+  if (((buttons_state & mask) == mask) && ((buttons_previous_state & mask) == mask))
   {
     return true;
   }
@@ -75,7 +75,7 @@ bool button_held (uint8_t button_number) {
 bool button_released(uint8_t button_number)
 {
   uint8_t mask = 1 << button_number;
-  if ((buttons_state & mask == 0) && (buttons_previous_state & mask == mask))
+  if (((buttons_state & mask) == 0) && ((buttons_previous_state & mask) == mask))
   {
     return true;
   }
@@ -113,21 +113,22 @@ void loop() {
   unsigned long time = millis();
   if (time - previous_millis >= input_interval) {
     previous_millis = time;
-    if (digitalRead(BUTTON_1) == LOW) {
+    if (button_pressed(BUTTON_0)) {
       Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press('z');
       Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.release('z');
     }
 
-    if (digitalRead(BUTTON_2) == LOW) {
+    if (button_pressed(BUTTON_1))
+    {
       Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press('x');
       Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.release('x');
     }
 
-    if (digitalRead(BUTTON_3) == LOW)
+    if (button_pressed(BUTTON_2))
     {
       Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press('c');
@@ -135,7 +136,7 @@ void loop() {
       Keyboard.release('c');
     }
 
-    if (digitalRead(BUTTON_4) == LOW)
+    if (button_pressed(BUTTON_3))
     {
       Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press('v');
