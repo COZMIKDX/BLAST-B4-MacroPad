@@ -12,6 +12,7 @@ uint8_t buttons_state = B00000000;
 uint8_t buttons_previous_state = B00000000;
 unsigned long debounce_start_time [NUM_BUTTONS] = {0};
 const unsigned int debounce_delay = 50; // milliseconds.
+bool debounce_in_progress [NUM_BUTTONS] = {false};
 
 
 unsigned long input_interval = 50; //ms 
@@ -50,15 +51,20 @@ void button_poll() {
 
   for (int i = 0; i < NUM_BUTTONS; i++) {
     // If the button's state is read differently than it was previously, start the debounce timer.
-    if (digitalRead(BUTTON_PINS [i]) != !(buttons_previous_state & (1 << i))) {
-      //debounce_start_time[i] = millis();
-      Serial.print("change detected: ");
-      Serial.print(i);
-      Serial.print("\n");
+    // I have the electronics configure such that the button pins are active LOW.
+    // So, when the buttons are pressed (read as LOW) I need to invert that for comparing with
+    // the button state variables, which are store such that 1 is pressed and 0 is not pressed.
+    uint8_t reading = !digitalRead(BUTTON_PINS[i]);
+    uint8_t prev_state = get_button_previous_state(i);
+    if ((debounce_in_progress[i] == false) && (reading != prev_state))
+    { //((!digitalRead(BUTTON_PINS[i])) != get_button_previous_state(i)) {
+      debounce_start_time[i] = millis();
+      debounce_in_progress[i] = true;
+      
     }
 
     // Debounce for this button is probably done now, so it should be okay to save it's state.
-    if (millis() - debounce_start_time[i] > debounce_delay) {
+    if ((debounce_in_progress[i] == true) && (millis() - debounce_start_time[i] > debounce_delay)) {
       /*if (digitalRead(BUTTON_PINS[i]) == LOW)
       {
         buttons_state |= 1 << i;
@@ -69,17 +75,22 @@ void button_poll() {
       }*/
 
       // If the previous state is still different, flip that button's bit.
-      if (digitalRead(BUTTON_PINS[i]) != (buttons_previous_state & (1 << i)))
+      if ((!digitalRead(BUTTON_PINS[i])) != get_button_previous_state(i))
       {
+        Serial.print("State: "); Serial.print(buttons_state, BIN); Serial.print("  prev_state: "); Serial.print(buttons_previous_state, BIN);
+
         buttons_state ^= (1 << i);
+        debounce_in_progress[i] = false;
+        Serial.print("\nchange saved: B"); Serial.print(i);
+        Serial.print("\n[Updated] State: "); Serial.print(buttons_state, BIN); Serial.print("  prev_state: "); Serial.print(buttons_previous_state, BIN);
+        Serial.print("\n");
       }
     }
   }
 }
 
 bool button_pressed (uint8_t button_number) {
-  uint8_t mask = 1 << button_number;
-  if (((buttons_state & mask) == mask) && ((buttons_previous_state & mask) == 0)) {
+  if ((get_button_state(button_number) == true) && (get_button_previous_state(button_number) == false)) {
     return true;
   }
   else {
@@ -89,8 +100,7 @@ bool button_pressed (uint8_t button_number) {
 
 // can be used if you want repeated function calling. Like, holding a key to print it several times.
 bool button_held (uint8_t button_number) {
-  uint8_t mask = 1 << button_number;
-  if (((buttons_state & mask) == mask) && ((buttons_previous_state & mask) == mask))
+  if ((get_button_state(button_number) == true) && (get_button_previous_state(button_number) == true))
   {
     return true;
   }
@@ -102,8 +112,7 @@ bool button_held (uint8_t button_number) {
 
 bool button_released(uint8_t button_number)
 {
-  uint8_t mask = 1 << button_number;
-  if (((buttons_state & mask) == 0) && ((buttons_previous_state & mask) == mask))
+  if ((get_button_state(button_number) == false) && (get_button_previous_state(button_number) == true))
   {
     return true;
   }
