@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "HID-Project.h"
 
+const bool DEBUG = false;
+
 const uint8_t STATUS_LED = 10;
 const uint8_t NUM_BUTTONS = 4;
 const uint8_t BUTTON_PINS [NUM_BUTTONS] = {6, 7, 8, 9};
@@ -42,8 +44,6 @@ uint8_t get_button_previous_state(uint8_t button_number)
   return state >> button_number;
 }
 
-
-
 void button_poll() {
   // Set the old button state data to the previous state before  we poll the buttons and
   // get the current state.
@@ -57,33 +57,24 @@ void button_poll() {
     uint8_t reading = !digitalRead(BUTTON_PINS[i]);
     uint8_t prev_state = get_button_previous_state(i);
     if ((debounce_in_progress[i] == false) && (reading != prev_state))
-    { //((!digitalRead(BUTTON_PINS[i])) != get_button_previous_state(i)) {
+    {
       debounce_start_time[i] = millis();
       debounce_in_progress[i] = true;
-      
     }
 
     // Debounce for this button is probably done now, so it should be okay to save it's state.
     if ((debounce_in_progress[i] == true) && (millis() - debounce_start_time[i] > debounce_delay)) {
-      /*if (digitalRead(BUTTON_PINS[i]) == LOW)
-      {
-        buttons_state |= 1 << i;
-      }
-      else
-      {
-        buttons_state &= ~(1 << i);
-      }*/
-
       // If the previous state is still different, flip that button's bit.
       if ((!digitalRead(BUTTON_PINS[i])) != get_button_previous_state(i))
       {
-        Serial.print("State: "); Serial.print(buttons_state, BIN); Serial.print("  prev_state: "); Serial.print(buttons_previous_state, BIN);
-
         buttons_state ^= (1 << i);
         debounce_in_progress[i] = false;
+
+        if (DEBUG) {
         Serial.print("\nchange saved: B"); Serial.print(i);
         Serial.print("\n[Updated] State: "); Serial.print(buttons_state, BIN); Serial.print("  prev_state: "); Serial.print(buttons_previous_state, BIN);
         Serial.print("\n");
+        }
       }
     }
   }
