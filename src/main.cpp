@@ -115,40 +115,36 @@ bool button_released(uint8_t button_number)
 
 // Will eventually take function pointers as arguments.
 void button_responses() {
-  unsigned long time = millis();
-  if (time - previous_millis >= input_interval) {
-    previous_millis = time;
     if (button_pressed(BUTTON_0)) {
-      // Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press('z');
-      // Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.release('z');
     }
 
     if (button_pressed(BUTTON_1))
     {
-      // Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press('x');
-      // Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.release('x');
     }
 
     if (button_pressed(BUTTON_2))
     {
-      // Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press('c');
-      // Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.release('c');
     }
 
     if (button_pressed(BUTTON_3))
     {
-      // Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.press(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.press('v');
-      // Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
+      Keyboard.release(HID_KEYBOARD_LEFT_CONTROL);
       Keyboard.release('v');
     }
-  }
 }
 
 void setup() {
